@@ -11,13 +11,16 @@
 
 import os
 import cgi
-import cgitb; cgitb.enable()
+import cgitb
+
+cgitb.enable()
+
 
 def printPrompt():
-    print """
+    print("""
 <html>
     <head>
-        <title>Debian File Uploader</title>
+        <title>David's File Uploader</title>
     </head>
     <body>
         <h1>Debian File Uploader</h1>
@@ -34,24 +37,24 @@ def printPrompt():
         </p>
     </body>
 </html>
-"""
+""")
+
 
 def check_params():
-    
     print("<html>\n")
-    
+
     # Get Uploads
-    form = cgi.FieldStorage();
-    
+    form = cgi.FieldStorage()
+
     # Generator to buffer file in chunks
     def fbuff(f, bsize=10000):
         while True:
             buff = f.read(bsize)
             if not buff: break
             yield buff
-    
+
     # Check that something was uploaded
-    if form.has_key('ufiles'):
+    if 'udir' in form:
         ufiles = form['ufiles']
         if not isinstance(ufiles, list):
             if ufiles.filename is '':
@@ -59,32 +62,32 @@ def check_params():
                 return False
             ufiles = [form['ufiles']]
         udir = ""
-        if form.has_key('udir'):
+        if 'udir' in form:
             udir = form['udir'].file.read()
-            if not os.path.exists('/home/debian/' + udir):
-                 print("""
+            if not os.path.exists('/home/david/' + udir):
+                print("""
                  <b>*<i>Invalid Destination:
                  '~/{0}' does not exist.
                  </i>*</b>
                  """.format(udir))
-                 return False
+                return False
 
         # Attempt to write each file
         for ufile in ufiles:
             # Get base filename & ovoid directory access violation
             fn = os.path.basename(ufile.filename)
-                        
+
             # Split and write file by chunks
-            f = open('/home/debian/' + udir  +'/'+ fn, 'wb', 10000)
+            f = open('/home/david/' + udir + '/' + fn, 'wb', 10000)
             for buff in fbuff(ufile.file):
                 f.write(buff)
             f.close()
             print("""<pre>Successfully Uploaded:
                 {0}</pre>
             """.format(fn))
-                
+
         return True
-                
+
     return False
 
 
@@ -94,5 +97,3 @@ if __name__ == "__main__":
     print("<hr>")
     check_params()
     print("</html>")
-
-
